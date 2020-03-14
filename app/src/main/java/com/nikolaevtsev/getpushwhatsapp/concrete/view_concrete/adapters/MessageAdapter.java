@@ -15,15 +15,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
-    List<MessageForView> messages;
+    private List<MessageForView> messages;
+    private int countMessagesOnTheScreen;
+    private static final int COUNT_MESSAGES_ON_THE_PAGE = 10;
 
     public MessageAdapter() {
         messages = new ArrayList<>();
+        countMessagesOnTheScreen = 0;
     }
 
     public void setMessages(List<MessageForView> messages) {
         this.messages = messages;
+        if (messages.size() < COUNT_MESSAGES_ON_THE_PAGE) {
+            countMessagesOnTheScreen = messages.size();
+        } else {
+            messages.size();
+            if (countMessagesOnTheScreen < COUNT_MESSAGES_ON_THE_PAGE) {
+                countMessagesOnTheScreen = COUNT_MESSAGES_ON_THE_PAGE;
+            } else if (countMessagesOnTheScreen / COUNT_MESSAGES_ON_THE_PAGE ==
+                    messages.size() / countMessagesOnTheScreen) {
+                countMessagesOnTheScreen = messages.size();
+            }
+        }
         notifyDataSetChanged();
+
     }
 
     @NonNull
@@ -36,10 +51,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        MessageForView message = messages.get(position);
-        holder.textViewPostTime.setText(message.getTimePost());
-        holder.textViewMessageFrom.setText(message.getFromContact());
-        holder.textViewMessageText.setText(message.getMessageText());
+        if (position == countMessagesOnTheScreen - 1) {
+            if (messages.size() > countMessagesOnTheScreen + COUNT_MESSAGES_ON_THE_PAGE) {
+                countMessagesOnTheScreen += COUNT_MESSAGES_ON_THE_PAGE;
+            } else if (countMessagesOnTheScreen < messages.size()) {
+                countMessagesOnTheScreen = messages.size();
+            }
+        }
+        if (position < countMessagesOnTheScreen) {
+            MessageForView message = messages.get(messages.size() - 1 - position);
+            holder.textViewPostTime.setText(message.getTimePost());
+            holder.textViewMessageFrom.setText(message.getFromContact());
+            holder.textViewMessageText.setText(message.getMessageText());
+        }
     }
 
     @Override
@@ -58,6 +82,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             textViewPostTime = itemView.findViewById(R.id.textViewPostTime);
             textViewMessageFrom = itemView.findViewById(R.id.textViewMessageFrom);
             textViewMessageText = itemView.findViewById(R.id.textViewMessageText);
+
         }
     }
 }
